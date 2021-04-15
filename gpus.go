@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"strings"
 	"strconv"
+	"regexp"
 )
 
 type GPUsMetrics struct {
@@ -55,17 +56,19 @@ func ParseAllocatedGPUs() float64 {
 	return num_gpus
 }
 
-func ParseGPUString(descriptor string) {
+func ParseGPUString(descriptor string) float64 {
 	descriptor = strings.TrimPrefix(descriptor, "gpu:")
 	descriptor = strings.Split(descriptor, "(")[0]
 	tentative_gpu := strings.Split(descriptor, ":")
+	var num_gpus = 0.0
 	if len(tentative_gpu) == 2 {
-		node_gpus, _ := strconv.ParseFloat(tentative_gpu[1], 64)
-		return node_gpus
+		gpu, _ := strconv.ParseFloat(tentative_gpu[1], 64)
+		num_gpus = gpu
 	}else{
-		node_gpus, _ :=  strconv.ParseFloat(descriptor, 64)
-		return node_gpus
+		gpu, _ :=  strconv.ParseFloat(descriptor, 64)
+		num_gpus = gpu
 	}
+	return num_gpus
 }
 
 func ParseRunningGPUs() float64 {
@@ -100,7 +103,7 @@ func ParseTotalGPUs() float64 {
 			if len(line) > 0 {
 				line = strings.Trim(line, "\"")
 				descriptor := strings.Fields(line)[1]
-				num_gpus += ParseGPUString(fields[1])			
+				num_gpus += ParseGPUString(descriptor)			
 			}
 		}
 	}
