@@ -23,6 +23,7 @@ import (
 	"strings"
 	"strconv"
 	"regexp"
+	"fmt"
 )
 
 type GPUsMetrics struct {
@@ -42,13 +43,16 @@ func GPUsGetMetrics() *GPUsMetrics {
 func ParseAllocatedGPUs() float64 {
 	var num_gpus = 0.0
 
-	args := []string{"-a", "-X", "--format=Allocgres", "--state=RUNNING", "--noheader", "--parsable2"}
+	args := []string{"-a", "-X", "--format=User,Allocgres", "--state=RUNNING", "--noheader", "--parsable2"}
 	output := string(Execute("sacct", args))
 	if len(output) > 0 {
 		for _, line := range strings.Split(output, "\n") {
 			if len(line) > 0 {
 				line = strings.Trim(line, "\"")
-				descriptor := strings.TrimPrefix(line, "gpu:")
+				fields := strings.Split(line, "|")
+				user := fields[0]
+				descriptor := strings.TrimPrefix(fields[1], "gpu:")
+				fmt.Println(user)
 				job_gpus, _ := strconv.ParseFloat(descriptor, 64)
 				num_gpus += job_gpus
 			}
