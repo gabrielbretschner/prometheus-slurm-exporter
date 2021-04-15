@@ -22,7 +22,6 @@ import (
 	"os/exec"
 	"strings"
 	"strconv"
-	"fmt"
 )
 
 type GPUsMetrics struct {
