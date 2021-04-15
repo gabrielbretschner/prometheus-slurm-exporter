@@ -30,7 +30,9 @@ type GPUsMetrics struct {
 	idle        float64
 	total       float64
 	running 	float64
+	unused	 	float64
 	utilization float64
+	node_utilization float64
 }
 
 func GPUsGetMetrics() *GPUsMetrics {
@@ -117,9 +119,11 @@ func ParseGPUsMetrics() *GPUsMetrics {
 	allocated_gpus := ParseAllocatedGPUs()
 	running_gpus := ParseRunningGPUs()
 	gm.alloc = allocated_gpus
-	gm.idle = total_gpus - allocated_gpus
-	gm.total = total_gpus
 	gm.running = running_gpus
+	gm.idle = total_gpus - allocated_gpus
+	gm.unused = running_gpus - allocated_gpus
+	gm.node_utilization = allocated_gpus / running_gpus
+	gm.total = total_gpus
 	gm.utilization = allocated_gpus / total_gpus
 	return &gm
 }
@@ -153,7 +157,9 @@ func NewGPUsCollector() *GPUsCollector {
 		idle:  prometheus.NewDesc("slurm_gpus_idle", "Idle GPUs", nil, nil),
 		total: prometheus.NewDesc("slurm_gpus_total", "Total GPUs", nil, nil),
 		running: prometheus.NewDesc("slurm_gpus_running", "Running GPUs", nil, nil),
+		unused: prometheus.NewDesc("slurm_gpus_unused", "Idle running GPUs", nil, nil),
 		utilization: prometheus.NewDesc("slurm_gpus_utilization", "Total GPU utilization", nil, nil),
+		node_utilization: prometheus.NewDesc("slurm_gpus_node_utilization", "Total running GPU nodes utilization", nil, nil),
 	}
 }
 
@@ -162,7 +168,9 @@ type GPUsCollector struct {
 	idle        *prometheus.Desc
 	total       *prometheus.Desc
 	running     *prometheus.Desc
+	unused      *prometheus.Desc
 	utilization *prometheus.Desc
+	node_utilization *prometheus.Desc
 }
 
 // Send all metric descriptions
@@ -171,7 +179,9 @@ func (cc *GPUsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- cc.idle
 	ch <- cc.total
 	ch <- cc.running
+	ch <- cc.unused
 	ch <- cc.utilization
+	ch <- cc.node_utilization
 }
 func (cc *GPUsCollector) Collect(ch chan<- prometheus.Metric) {
 	cm := GPUsGetMetrics()
@@ -179,5 +189,7 @@ func (cc *GPUsCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(cc.idle, prometheus.GaugeValue, cm.idle)
 	ch <- prometheus.MustNewConstMetric(cc.total, prometheus.GaugeValue, cm.total)
 	ch <- prometheus.MustNewConstMetric(cc.running, prometheus.GaugeValue, cm.running)
+	ch <- prometheus.MustNewConstMetric(cc.unused, prometheus.GaugeValue, cm.unused)
 	ch <- prometheus.MustNewConstMetric(cc.utilization, prometheus.GaugeValue, cm.utilization)
+	ch <- prometheus.MustNewConstMetric(cc.node_utilization, prometheus.GaugeValue, cm.node_utilization)
 }
