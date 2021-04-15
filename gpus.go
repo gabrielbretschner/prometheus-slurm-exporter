@@ -69,10 +69,11 @@ func ParseTotalGPUs() float64 {
 				tentative_gpu := strings.Split(descriptor, ":")
 				if len(tentative_gpu) == 2 {
 					node_gpus, _ := strconv.ParseFloat(tentative_gpu[1], 64)
+					num_gpus += node_gpus
 				}else{
-					node_gpus, _ =  strconv.ParseFloat(descriptor, 64)
+					node_gpus, _ :=  strconv.ParseFloat(descriptor, 64)
+					num_gpus += node_gpus
 				}
-				num_gpus += node_gpus
 			}
 		}
 	}
