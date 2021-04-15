@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"strings"
 	"strconv"
+	"fmt"
 )
 
 type GPUsMetrics struct {
@@ -66,6 +67,7 @@ func ParseTotalGPUs() float64 {
 				descriptor := strings.Fields(line)[1]
 				descriptor = strings.TrimPrefix(descriptor, "gpu:")
 				descriptor = strings.Split(descriptor, "(")[0]
+				fmt.Println(descriptor)
 				node_gpus, _ :=  strconv.ParseFloat(descriptor, 64)
 				num_gpus += node_gpus
 			}
