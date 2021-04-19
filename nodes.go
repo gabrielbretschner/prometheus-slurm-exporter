@@ -51,8 +51,10 @@ func RemoveDuplicates(s []string) []string {
 	// Walk through the slice 's' and for each value we haven't seen so far, append it to 't'.
 	for _, v := range s {
 		if _, seen := m[v]; !seen {
-			t = append(t, v)
-			m[v] = true
+			if len(v) > 0 {
+				t = append(t, v)
+				m[v] = true
+			}
 		}
 	}
 
@@ -97,9 +99,9 @@ func ParseNodesMetrics(input []byte) *NodesMetrics {
 			case err.MatchString(state) == true:
 				nm.err += count
 			case idle.MatchString(state) == true:
-        if idle_power_save.MatchString(state) == true {
-          nm.idle_power_save += count
-        }
+				if idle_power_save.MatchString(state) == true {
+					nm.idle_power_save += count
+				}
 				nm.idle += count
 			case maint.MatchString(state) == true:
 				nm.maint += count
